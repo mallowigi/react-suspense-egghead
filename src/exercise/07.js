@@ -55,26 +55,28 @@ function App() {
     <div className="pokemon-info-app">
       <div className={cn.root}>
         <PokemonErrorBoundary onReset={handleReset} resetKeys={[pokemonResource]}>
-          <React.SuspenseList revealOrder="together">
+          <React.SuspenseList revealOrder="forwards">
             {/* Navbar (delayed) */}
             <React.Suspense fallback={PokemonLoading}>
               <NavBar pokemonResource={pokemonResource} />
             </React.Suspense>
 
-            <div className={cn.mainContentArea}>
-              {/* Left nav (delayed) */}
-              <React.Suspense fallback={PokemonLoading}>
-                <LeftNav />
-              </React.Suspense>
-              {/* Main Content (delayed) */}
-              <React.Suspense fallback={PokemonLoading}>
-                <MainContent pokemonResource={pokemonResource} />
-              </React.Suspense>
-              {/* Right nav (delayed) */}
-              <React.Suspense fallback={PokemonLoading}>
-                <RightNav pokemonResource={pokemonResource} />
-              </React.Suspense>
-            </div>
+            <React.SuspenseList revealOrder="together">
+              <div className={cn.mainContentArea}>
+                {/* Left nav (delayed) */}
+                <React.Suspense fallback={PokemonLoading}>
+                  <LeftNav />
+                </React.Suspense>
+                {/* Main Content (delayed) */}
+                <React.Suspense fallback={PokemonLoading}>
+                  <MainContent pokemonResource={pokemonResource} />
+                </React.Suspense>
+                {/* Right nav (delayed) */}
+                <React.Suspense fallback={PokemonLoading}>
+                  <RightNav pokemonResource={pokemonResource} />
+                </React.Suspense>
+              </div>
+            </React.SuspenseList>
           </React.SuspenseList>
         </PokemonErrorBoundary>
       </div>
