@@ -55,7 +55,7 @@ function App() {
     <div className="pokemon-info-app">
       <div className={cn.root}>
         <PokemonErrorBoundary onReset={handleReset} resetKeys={[pokemonResource]}>
-          <React.SuspenseList revealOrder="forwards">
+          <React.SuspenseList revealOrder="forwards" tail="collapsed">
             {/* Navbar (delayed) */}
             <React.Suspense fallback={PokemonLoading}>
               <NavBar pokemonResource={pokemonResource} />
