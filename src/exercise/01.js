@@ -1,21 +1,11 @@
 import React from 'react';
 import {fetchPokemon, PokemonDataView, PokemonErrorBoundary} from '../pokemon';
+import {createResource} from '../utils';
 
-let pokemon;
-let errorMessage;
-let promise = fetchPokemon('pikacha').then(
-  (pokemonData) => (pokemon = pokemonData),
-  (error) => (errorMessage = error),
-);
+const pokemonResource = createResource(fetchPokemon('pikacha'));
 
 function PokemonInfo() {
-  if (errorMessage) {
-    throw errorMessage;
-  }
-  if (!pokemon) {
-    throw promise;
-  }
-
+  const pokemon = pokemonResource.read();
   return (
     <div>
       <div className="pokemon-info__img-wrapper">
