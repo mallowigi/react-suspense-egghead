@@ -12,11 +12,29 @@ import {fetchUser, PokemonErrorBoundary, PokemonForm} from '../pokemon';
  */
 const delay = (time) => (promiseResult) => new Promise((resolve) => setTimeout(() => resolve(promiseResult), time));
 
+function lazyPreload(dynamicImport) {
+  let promise;
+
+  // Load the dynamic import
+  function load() {
+    if (!promise) {
+      promise = dynamicImport();
+    }
+
+    return promise;
+  }
+
+  // Decorate the React.lazy with a preload function to manually trigger the preload
+  let Component = React.lazy(load);
+  Component.preload = load;
+  return Component;
+}
+
 // Our components, delayed
-const NavBar = React.lazy(() => import('../suspense-list/nav-bar').then(delay(500)));
-const LeftNav = React.lazy(() => import('../suspense-list/left-nav').then(delay(2000)));
-const MainContent = React.lazy(() => import('../suspense-list/main-content').then(delay(1500)));
-const RightNav = React.lazy(() => import('../suspense-list/right-nav').then(delay(1000)));
+const NavBar = lazyPreload(() => import('../suspense-list/nav-bar').then(delay(500)));
+const LeftNav = lazyPreload(() => import('../suspense-list/left-nav').then(delay(2000)));
+const MainContent = lazyPreload(() => import('../suspense-list/main-content').then(delay(1500)));
+const RightNav = lazyPreload(() => import('../suspense-list/right-nav').then(delay(1000)));
 
 // Use a loading pokeball for our fallback
 const PokemonLoading = (
@@ -33,6 +51,11 @@ function App() {
   function handleSubmit(pokemonName) {
     startTransition(() => {
       setPokemonResource(createResource(fetchUser(pokemonName)));
+      // Improvement: preload our components ahead of time
+      NavBar.preload();
+      LeftNav.preload();
+      RightNav.preload();
+      MainContent.preload();
     });
   }
 
