@@ -1,8 +1,8 @@
 import React from 'react';
-import {fetchPokemon, getImageUrlForPokemon, PokemonDataView, PokemonErrorBoundary, PokemonForm, PokemonInfoFallback} from '../pokemon';
+import {fetchPokemon, getImageUrlForPokemon, PokemonErrorBoundary, PokemonForm, PokemonInfoFallback} from '../pokemon';
 import {createResource, preloadImage} from '../utils';
 
-const imgSrcResourceCache = {};
+const PokemonInfo = React.lazy(() => import('../lazy/pokemon-info-render-as-you-fetch'));
 
 /**
  * An cached image component that preload images before rendering the tag
@@ -12,35 +12,6 @@ const imgSrcResourceCache = {};
  * @returns {JSX.Element}
  * @constructor
  */
-function Img({src, alt, ...props}) {
-  let image = imgSrcResourceCache[src];
-  if (!image) {
-    image = createResource(preloadImage(src));
-    imgSrcResourceCache[src] = image;
-  }
-  return <img alt={alt} src={image.read()} {...props} />;
-}
-
-/**
- * Simple component displaying a Pokemon resource
- * @param pokemonResource
- * @returns {JSX.Element}
- * @constructor
- */
-function PokemonInfo({pokemonResource}) {
-  // Preload pokemon data and image at the same time
-  const pokemon = pokemonResource.data.read();
-  const image = pokemonResource.image.read();
-  return (
-    <div>
-      <div className="pokemon-info__img-wrapper">
-        <Img src={image} alt={pokemon.name} />
-      </div>
-      <PokemonDataView pokemon={pokemon} />
-    </div>
-  );
-}
-
 const SUSPENSE_CONFIG = {
   timeoutMs: 4000,
   busyDelayMs: 300,
