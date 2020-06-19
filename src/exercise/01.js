@@ -1,10 +1,17 @@
 import React from 'react';
-import {fetchPokemon, PokemonDataView} from '../pokemon';
+import {fetchPokemon, PokemonDataView, PokemonErrorBoundary} from '../pokemon';
 
 let pokemon;
-let promise = fetchPokemon('pikachu').then((pokemonData) => (pokemon = pokemonData));
+let errorMessage;
+let promise = fetchPokemon('pikacha').then(
+  (pokemonData) => (pokemon = pokemonData),
+  (error) => (errorMessage = error),
+);
 
 function PokemonInfo() {
+  if (errorMessage) {
+    throw errorMessage;
+  }
   if (!pokemon) {
     throw promise;
   }
@@ -23,9 +30,11 @@ function App() {
   return (
     <div className="pokemon-info-app">
       <div className="pokemon-info">
-        <React.Suspense fallback={<div>Loading Pokemon...</div>}>
-          <PokemonInfo />
-        </React.Suspense>
+        <PokemonErrorBoundary>
+          <React.Suspense fallback={<div>Loading Pokemon...</div>}>
+            <PokemonInfo />
+          </React.Suspense>
+        </PokemonErrorBoundary>
       </div>
     </div>
   );
