@@ -14,20 +14,15 @@ function PokemonInfo({pokemonResource}) {
   );
 }
 
-// 🐨 create a SUSPENSE_CONFIG variable right here and configure timeoutMs to
-// whatever feels right to you, then try it out and tweek it until you're happy
-// with the experience.
+const SUSPENSE_CONFIG = {timeoutMs: 4000};
 
 function createPokemonResource(pokemonName) {
-  let delay = 1500;
-  return createResource(fetchPokemon(pokemonName, delay));
+  return createResource(fetchPokemon(pokemonName, 1500));
 }
 
 function App() {
   const [pokemonName, setPokemonName] = React.useState('');
-  const [startTransition, isPending] = React.useTransition({
-    timeoutMs: 4000,
-  });
+  const [startTransition, isPending] = React.useTransition(SUSPENSE_CONFIG);
   const [pokemonResource, setPokemonResource] = React.useState(null);
 
   React.useEffect(() => {
@@ -35,16 +30,13 @@ function App() {
       setPokemonResource(null);
       return;
     }
-    // 🐨 wrap this next line in a startTransition call
-    setPokemonResource(createPokemonResource(pokemonName));
-    // 🐨 add startTransition to the deps list here
-  }, [pokemonName]);
+    startTransition(() => {
+      setPokemonResource(createPokemonResource(pokemonName));
+    });
+  }, [pokemonName, startTransition]);
 
   function handleSubmit(newPokemonName) {
     setPokemonName(newPokemonName);
-    startTransition(() => {
-      setPokemonResource(createPokemonResource(newPokemonName));
-    });
   }
 
   function handleReset() {
@@ -55,7 +47,7 @@ function App() {
     <div className="pokemon-info-app">
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
-      <div style={{opacity: isPending ? 0.6 : 1}} className="pokemon-info">
+      <div className={`pokemon-info ${isPending ? 'pokemon-loading' : ''}`}>
         {pokemonResource ? (
           <PokemonErrorBoundary onReset={handleReset} resetKeys={[pokemonResource]}>
             <React.Suspense fallback={<PokemonInfoFallback name={pokemonName} />}>
