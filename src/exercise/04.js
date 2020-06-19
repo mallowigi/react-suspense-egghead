@@ -39,23 +39,43 @@ const PokemonResourceCacheContext = React.createContext();
  * @returns {JSX.Element}
  * @constructor
  */
-function PokemonCacheProvider({children}) {
+function PokemonCacheProvider({children, cacheTime}) {
   const cache = React.useRef({});
+  const expirations = React.useRef({});
+
+  // Start an interval to clear cache when it expires
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      // For each expirations, if the current time is posterior, destroy the cache entry
+      for (const [name, time] of Object.entries(expirations.current)) {
+        if (time < Date.now()) {
+          delete cache.current[name];
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   /**
    * A memoized function to retrieve a pokemon from the Pokemon API and the cache.
    * @type {function(*): *}
    */
-  const getPokemonResource = React.useCallback((pokemonName) => {
-    const lowerCaseName = pokemonName.toLowerCase();
-    let resource = cache.current[lowerCaseName];
-    if (!resource) {
-      resource = createPokemonResource(lowerCaseName);
-      cache.current[lowerCaseName] = resource;
-    }
+  const getPokemonResource = React.useCallback(
+    (pokemonName) => {
+      const lowerCaseName = pokemonName.toLowerCase();
+      let resource = cache.current[lowerCaseName];
+      if (!resource) {
+        resource = createPokemonResource(lowerCaseName);
+        cache.current[lowerCaseName] = resource;
+      }
 
-    return resource;
-  }, []);
+      // Add expiration to cacheTime seconds later
+      expirations.current[lowerCaseName] = Date.now() + cacheTime;
+      return resource;
+    },
+    [cacheTime],
+  );
 
   return <PokemonResourceCacheContext.Provider value={getPokemonResource}>{children}</PokemonResourceCacheContext.Provider>;
 }
@@ -140,7 +160,7 @@ function App() {
  */
 function AppWithProvider() {
   return (
-    <PokemonCacheProvider>
+    <PokemonCacheProvider cacheTime={5000}>
       <App />
     </PokemonCacheProvider>
   );
