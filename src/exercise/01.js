@@ -1,8 +1,8 @@
 import React from 'react';
-import {fetchPokemon, PokemonDataView, PokemonErrorBoundary} from '../pokemon';
+import {fetchPokemon, PokemonDataView, PokemonErrorBoundary, PokemonInfoFallback} from '../pokemon';
 import {createResource} from '../utils';
 
-const pokemonResource = createResource(fetchPokemon('pikacha'));
+const pokemonResource = createResource(fetchPokemon('pikachu'));
 
 function PokemonInfo() {
   const pokemon = pokemonResource.read();
@@ -21,7 +21,7 @@ function App() {
     <div className="pokemon-info-app">
       <div className="pokemon-info">
         <PokemonErrorBoundary>
-          <React.Suspense fallback={<div>Loading Pokemon...</div>}>
+          <React.Suspense fallback={<PokemonInfoFallback />}>
             <PokemonInfo />
           </React.Suspense>
         </PokemonErrorBoundary>
