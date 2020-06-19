@@ -1,9 +1,17 @@
 import React from 'react';
-import {fetchPokemon, PokemonDataView, PokemonErrorBoundary, PokemonForm, PokemonInfoFallback} from '../pokemon';
+import {fetchPokemon, getImageUrlForPokemon, PokemonDataView, PokemonErrorBoundary, PokemonForm, PokemonInfoFallback} from '../pokemon';
 import {createResource, preloadImage} from '../utils';
 
 const imgSrcResourceCache = {};
 
+/**
+ * An cached image component that preload images before rendering the tag
+ * @param src
+ * @param alt
+ * @param props
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function Img({src, alt, ...props}) {
   let image = imgSrcResourceCache[src];
   if (!image) {
@@ -13,12 +21,20 @@ function Img({src, alt, ...props}) {
   return <img alt={alt} src={image.read()} {...props} />;
 }
 
+/**
+ * Simple component displaying a Pokemon resource
+ * @param pokemonResource
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function PokemonInfo({pokemonResource}) {
-  const pokemon = pokemonResource.read();
+  // Preload pokemon data and image at the same time
+  const pokemon = pokemonResource.data.read();
+  const image = pokemonResource.image.read();
   return (
     <div>
       <div className="pokemon-info__img-wrapper">
-        <Img src={pokemon.image} alt={pokemon.name} />
+        <Img src={image} alt={pokemon.name} />
       </div>
       <PokemonDataView pokemon={pokemon} />
     </div>
@@ -33,6 +49,10 @@ const SUSPENSE_CONFIG = {
 
 const pokemonResourceCache = {};
 
+/**
+ * Get Pokemon resource from cache or the API
+ * @param name
+ */
 function getPokemonResource(name) {
   const lowerName = name.toLowerCase();
   let resource = pokemonResourceCache[lowerName];
@@ -43,10 +63,22 @@ function getPokemonResource(name) {
   return resource;
 }
 
+/**
+ * Create a resource for retrieving pokemon data and image
+ * @param pokemonName
+ * @returns {{image: {read(): (*|undefined)}, data: {read(): (*|undefined)}}}
+ */
 function createPokemonResource(pokemonName) {
-  return createResource(fetchPokemon(pokemonName));
+  const data = createResource(fetchPokemon(pokemonName));
+  const image = createResource(preloadImage(getImageUrlForPokemon(pokemonName)));
+  return {data, image};
 }
 
+/**
+ * Our App Pokemon retriever
+ * @returns {JSX.Element}
+ * @constructor
+ */
 function App() {
   const [pokemonName, setPokemonName] = React.useState('');
   const [startTransition, isPending] = React.useTransition(SUSPENSE_CONFIG);
