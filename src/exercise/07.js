@@ -51,32 +51,31 @@ function App() {
     setPokemonResource(null);
   }
 
-  // 🐨 Use React.SuspenseList throughout these Suspending components to make
-  // them load in a way that is not jaring to the user.
-  // 💰 there's not really a specifically "right" answer for this.
   return (
     <div className="pokemon-info-app">
       <div className={cn.root}>
         <PokemonErrorBoundary onReset={handleReset} resetKeys={[pokemonResource]}>
-          {/* Navbar (delayed) */}
-          <React.Suspense fallback={PokemonLoading}>
-            <NavBar pokemonResource={pokemonResource} />
-          </React.Suspense>
+          <React.SuspenseList revealOrder="together">
+            {/* Navbar (delayed) */}
+            <React.Suspense fallback={PokemonLoading}>
+              <NavBar pokemonResource={pokemonResource} />
+            </React.Suspense>
 
-          <div className={cn.mainContentArea}>
-            {/* Left nav (delayed) */}
-            <React.Suspense fallback={PokemonLoading}>
-              <LeftNav />
-            </React.Suspense>
-            {/* Main Content (delayed) */}
-            <React.Suspense fallback={PokemonLoading}>
-              <MainContent pokemonResource={pokemonResource} />
-            </React.Suspense>
-            {/* Right nav (delayed) */}
-            <React.Suspense fallback={PokemonLoading}>
-              <RightNav pokemonResource={pokemonResource} />
-            </React.Suspense>
-          </div>
+            <div className={cn.mainContentArea}>
+              {/* Left nav (delayed) */}
+              <React.Suspense fallback={PokemonLoading}>
+                <LeftNav />
+              </React.Suspense>
+              {/* Main Content (delayed) */}
+              <React.Suspense fallback={PokemonLoading}>
+                <MainContent pokemonResource={pokemonResource} />
+              </React.Suspense>
+              {/* Right nav (delayed) */}
+              <React.Suspense fallback={PokemonLoading}>
+                <RightNav pokemonResource={pokemonResource} />
+              </React.Suspense>
+            </div>
+          </React.SuspenseList>
         </PokemonErrorBoundary>
       </div>
     </div>
